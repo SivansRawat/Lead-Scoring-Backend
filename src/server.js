@@ -1,4 +1,13 @@
-// src/server.js
+
+import dotenv from 'dotenv';
+import path from 'path';
+
+// Use absolute path for safety
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+
+console.log('OpenAI Key:', process.env.OPENAI_API_KEY);
+
+
 import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
