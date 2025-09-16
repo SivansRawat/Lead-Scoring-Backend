@@ -4,6 +4,14 @@ A backend service to manage leads and product offers, score each lead’s buying
 
 ---
 
+
+📊 Lead Scoring Backend
+
+This is a backend service for lead qualification and scoring.
+It accepts offers + leads, runs AI-based intent detection, applies rule-based scoring, and returns a ranked list of qualified leads.
+
+🌍 Live API: https://lead-scoring-backend-jm8ouwons-sivansrawats-projects.vercel.app/
+
 ## 🏗️ Features
 
 - Upload **offers** and **leads** (CSV supported)
