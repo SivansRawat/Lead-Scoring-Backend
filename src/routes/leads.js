@@ -81,15 +81,84 @@
 
 
 
+// import express from "express";
+// import multer from "multer";
+// import csvParser from "csv-parser";
+// import fs from "fs";
+// import { v4 as uuidv4 } from "uuid";
+// import { leads } from "../storage/store.js";
+
+// const router = express.Router();
+// const upload = multer({ dest: "uploads/" });
+
+// // Add single lead
+// router.post("/", (req, res) => {
+//   const lead = {
+//     id: uuidv4(),
+//     name: req.body.name || "",
+//     role: req.body.role || "",
+//     company: req.body.company || "",
+//     industry: req.body.industry || "",
+//     location: req.body.location || "",
+//     linkedin_bio: req.body.linkedin_bio || "",
+//   };
+
+//   leads.push(lead);
+//   res.status(201).json(lead);
+// });
+
+// // Bulk upload via CSV
+// router.post("/upload", upload.single("file"), (req, res) => {
+//   if (!req.file) return res.status(400).json({ error: "Missing file" });
+
+//   const newLeads = [];
+//   const stream = fs.createReadStream(req.file.path).pipe(csvParser());
+
+//   stream.on("data", (row) => {
+//     const lead = {
+//       id: uuidv4(),
+//       name: row.name || "",
+//       role: row.role || "",
+//       company: row.company || "",
+//       industry: row.industry || "",
+//       location: row.location || "",
+//       linkedin_bio: row.linkedin_bio || "",
+//     };
+//     newLeads.push(lead);
+//   });
+
+//   stream.on("end", () => {
+//     leads.push(...newLeads);
+//     fs.unlink(req.file.path, () => {});
+//     res.json({ ok: true, added: newLeads.length });
+//   });
+
+//   stream.on("error", (err) => {
+//     res.status(500).json({ error: "CSV parse error", details: err.message });
+//   });
+// });
+
+// // Get all leads
+// router.get("/", (req, res) => {
+//   res.json(leads);
+// });
+
+// export default router;
+
+
+
+
 import express from "express";
 import multer from "multer";
 import csvParser from "csv-parser";
-import fs from "fs";
+import { Readable } from "stream";
 import { v4 as uuidv4 } from "uuid";
 import { leads } from "../storage/store.js";
 
 const router = express.Router();
-const upload = multer({ dest: "uploads/" });
+
+// Use memory storage so no disk writes are needed (Vercel safe)
+const upload = multer({ storage: multer.memoryStorage() });
 
 // Add single lead
 router.post("/", (req, res) => {
@@ -112,7 +181,7 @@ router.post("/upload", upload.single("file"), (req, res) => {
   if (!req.file) return res.status(400).json({ error: "Missing file" });
 
   const newLeads = [];
-  const stream = fs.createReadStream(req.file.path).pipe(csvParser());
+  const stream = Readable.from(req.file.buffer.toString()).pipe(csvParser());
 
   stream.on("data", (row) => {
     const lead = {
@@ -129,7 +198,6 @@ router.post("/upload", upload.single("file"), (req, res) => {
 
   stream.on("end", () => {
     leads.push(...newLeads);
-    fs.unlink(req.file.path, () => {});
     res.json({ ok: true, added: newLeads.length });
   });
 
